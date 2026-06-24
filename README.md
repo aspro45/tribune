@@ -13,7 +13,7 @@ The product shape is a developer terminal for public work: post the problem, sub
 | Network | GenLayer Studionet |
 | Chain ID | `61999` |
 | Contract | `0x74814E96e2dF5d46E7404e0d4606CD6428fE5925` |
-| Contract Explorer | https://explorer-studio.genlayer.com/address/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925 |
+| Contract Explorer | https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925 |
 | Deploy TX | `0x28c00e32853ade25c70d82acac03b3585c6cabc5de0aa492046c50eb1c1be8e9` |
 | Deployed | `2026-06-24T00:33:00.303Z` |
 

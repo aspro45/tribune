@@ -2,7 +2,7 @@ import { makeReader, write, connectWallet, activeAccount, balanceOf, short, toGe
   from "./shared/genlayer-lite.js";
 
 const CONTRACT = "0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
-const EXPLORER = "https://explorer-studio.genlayer.com/address/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
+const EXPLORER = "https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
 const { read } = makeReader(CONTRACT);
 const B_OPEN = 0, B_PAID = 1, B_CANCELLED = 2;
 const SUB_PENDING = 0, SUB_ACCEPTED = 1, SUB_REJECTED = 2;
@@ -14,7 +14,7 @@ let account = null, bounties = [], submissions = [];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-$("contractLink").href = "https://explorer-studio.genlayer.com/address/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
+$("contractLink").href = "https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
 $("contractLink").textContent = "Contract " + short(CONTRACT) + " ->";
 $("contractLink").target = "_blank";
 $("contractLink").rel = "noopener";
