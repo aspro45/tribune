@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tribune - Bounties That Judge Themselves</title>
-<meta name="description" content="A self-judging bounty board on GenLayer. Sponsors lock a reward; anyone submits a solution URL; a validator set reads it against the spec and the first valid submission wins." />
+<title>Tribune - Bounties that judge themselves</title>
+<meta name="description" content="A self-judging bounty board on GenLayer. Sponsors lock a reward; anyone submits a solution URL; a validator set reads it against the spec and the first submission that passes wins. No maintainer gatekeeping." />
 <link rel="stylesheet" href="./styles.css?v=6">
 <link rel="preconnect" href="https://rsms.me/">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -34,9 +34,9 @@
   <canvas id="gridCanvas"></canvas>
   <div class="hero-inner">
     <div class="hero-copy">
-      <span class="eyebrow"><span class="dot"></span> Self-judging bounty board - GenLayer</span>
+      <span class="eyebrow"><span class="dot"></span> Self-judging bounty board · GenLayer</span>
       <h1>Bounties that<br>judge themselves.</h1>
-      <p class="lede">Lock a reward, write a spec, and let anyone submit a solution as a public URL. To settle, the contract reads the work against the spec and a validator set agrees whether it solves the bounty. The first submission that passes wins the reward: no maintainer to convince, no gatekeeping.</p>
+      <p class="lede">Lock a reward, write a spec, and let anyone submit a solution as a public URL. To settle, the contract reads the work against the spec and a validator set agrees whether it solves the bounty. The first submission that passes wins the reward - no maintainer to convince, no gatekeeping.</p>
       <div class="hero-cta">
         <button class="btn primary lg" id="heroPostBtn">Post a bounty <i class="ph-bold ph-arrow-right"></i></button>
         <a class="btn line lg" href="#bounties">Browse bounties</a>
@@ -56,6 +56,7 @@
 </header>
 
 <main class="page">
+
   <section class="strip">
     <div class="strip-cell"><b id="stOpen">0</b><span>Open bounties</span></div>
     <div class="strip-cell"><b id="stReward">0</b><span>GEN in rewards</span></div>
@@ -67,21 +68,21 @@
     <div class="sec-head"><span class="eyebrow">How it works</span><h2>Three steps, no gatekeeper.</h2></div>
     <div class="grid-3">
       <div class="cell"><span class="cn">01</span><h3>Post</h3><p>Write a clear spec and lock the reward in the contract. The bounty is open to anyone, anywhere.</p></div>
-      <div class="cell"><span class="cn">02</span><h3>Submit</h3><p>Solvers post their work as a public URL: a PR, a repo, a deployed page. As many submissions as it takes.</p></div>
+      <div class="cell"><span class="cn">02</span><h3>Submit</h3><p>Solvers post their work as a public URL - a PR, a repo, a deployed page. As many submissions as it takes.</p></div>
       <div class="cell"><span class="cn">03</span><h3>Judge</h3><p>The contract reads a submission against the spec and validators agree. First one that passes wins the reward, paid on-chain.</p></div>
     </div>
   </section>
 
   <section class="bounties" id="bounties">
     <div class="sec-row"><h2>Open bounties</h2><span class="mono count" id="bCount">-</span></div>
-    <div class="bounty-list" id="bountyList"><div class="b-empty">Reading the chain...</div></div>
+    <div class="bounty-list" id="bountyList"><div class="b-empty">Reading the chain…</div></div>
   </section>
 
   <section class="why" id="why">
     <div class="sec-head"><span class="eyebrow">Why Tribune</span><h2>Merit, judged by the work.</h2></div>
     <div class="grid-3">
-      <div class="cell"><i class="ph-bold ph-lock-key"></i><h3>Reward locked up front</h3><p>The bounty reward sits in the contract from the moment it is posted. Solvers know the money is real before they lift a finger.</p></div>
-      <div class="cell"><i class="ph-bold ph-magnifying-glass"></i><h3>Judged on the work</h3><p>The validator set reads the actual submission against the spec. No popularity contest, no maintainer mood: just whether it solves it.</p></div>
+      <div class="cell"><i class="ph-bold ph-lock-key"></i><h3>Reward locked up front</h3><p>The bounty's reward sits in the contract from the moment it's posted. Solvers know the money is real before they lift a finger.</p></div>
+      <div class="cell"><i class="ph-bold ph-magnifying-glass"></i><h3>Judged on the work</h3><p>The validator set reads the actual submission against the spec. No popularity contest, no maintainer's mood - just whether it solves it.</p></div>
       <div class="cell"><i class="ph-bold ph-trophy"></i><h3>First valid wins</h3><p>The first submission that passes takes the reward in the same transaction. Fast, final, and fully on-chain.</p></div>
     </div>
   </section>
@@ -89,25 +90,24 @@
   <section class="cta">
     <div class="cta-card">
       <h2>Got a problem worth paying for?</h2>
-      <p>Write the spec, lock the reward, and let the best solution win itself. One transaction on GenLayer studionet.</p>
+      <p>Write the spec, lock the reward, and let the best solution win itself. One transaction on GenLayer Bradbury.</p>
       <button class="btn primary lg" id="ctaPostBtn">Post a bounty <i class="ph-bold ph-arrow-right"></i></button>
     </div>
   </section>
+
 </main>
 
 <footer class="footer">
   <div class="footer-inner">
     <a class="brand" href="#top"><span class="logo-mark">{ }</span> Tribune</a>
     <div class="foot-links">
-      <a href="#how">How it works</a>
-      <a href="#bounties">Bounties</a>
-      <a href="#why">Why</a>
-      <a href="https://docs.genlayer.com/" target="_blank" rel="noopener">GenLayer docs -></a>
-      <a id="contractLink" href="https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925" target="_blank" rel="noopener">Contract -></a>
+      <a href="#how">How it works</a><a href="#bounties">Bounties</a><a href="#why">Why</a>
+      <a href="https://docs.genlayer.com/" target="_blank" rel="noopener">GenLayer docs ↗</a>
+      <a id="contractLink" href="https://explorer-bradbury.genlayer.com/address/0x6694f5D10f123DD9A8EDF2762690311e53f04deb" target="_blank" rel="noopener">Contract 0x6694...4deb -></a>
     </div>
-    <span class="foot-net"><span class="net-dot"></span>studionet - live</span>
+    <span class="foot-net"><span class="net-dot"></span>Bradbury · live</span>
   </div>
-  <div class="foot-base">Tribune - a self-judging bounty board on GenLayer studionet</div>
+  <div class="foot-base">Tribune · a self-judging bounty board on GenLayer Bradbury</div>
 </footer>
 
 <div class="scrim" id="scrim"></div>

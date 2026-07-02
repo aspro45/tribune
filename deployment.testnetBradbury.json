@@ -1,0 +1,15 @@
+{
+  "project": "14-tribune",
+  "name": "Tribune",
+  "network": "testnetBradbury",
+  "chainId": 4221,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "explorer": "https://explorer-bradbury.genlayer.com",
+  "contractAddress": "0x6694f5D10f123DD9A8EDF2762690311e53f04deb",
+  "deployTxHash": "0xfcc4c86ba58dceb5c683e14b7a15f0af99c92f019f882d94c91617b5e66538b7",
+  "contractExplorer": "https://explorer-bradbury.genlayer.com/address/0x6694f5D10f123DD9A8EDF2762690311e53f04deb",
+  "deployer": "0xf6d02F13D7BB5fC24aB6A3D662619641958A3Cf6",
+  "deployedAt": "2026-07-01T23:20:20.395Z",
+  "statusName": 5,
+  "smoke": {}
+}

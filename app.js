@@ -1,8 +1,7 @@
 import { makeReader, write, connectWallet, activeAccount, balanceOf, short, toGen, GEN, fmtErr }
   from "./shared/genlayer-lite.js";
 
-const CONTRACT = "0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
-const EXPLORER = "https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
+const CONTRACT = "0x6694f5D10f123DD9A8EDF2762690311e53f04deb";
 const { read } = makeReader(CONTRACT);
 const B_OPEN = 0, B_PAID = 1, B_CANCELLED = 2;
 const SUB_PENDING = 0, SUB_ACCEPTED = 1, SUB_REJECTED = 2;
@@ -14,10 +13,7 @@ let account = null, bounties = [], submissions = [];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-$("contractLink").href = "https://explorer-studio.genlayer.com/contracts/0x74814E96e2dF5d46E7404e0d4606CD6428fE5925";
-$("contractLink").textContent = "Contract " + short(CONTRACT) + " ->";
-$("contractLink").target = "_blank";
-$("contractLink").rel = "noopener";
+$("contractLink").textContent = "Contract " + short(CONTRACT) + " \u2197";
 
 function toast(msg, kind = "", title = "tribune") {
   const el = document.createElement("div"); el.className = "toast " + kind;
@@ -28,10 +24,10 @@ function toast(msg, kind = "", title = "tribune") {
 async function refreshWallet() {
   account = await activeAccount();
   const slot = $("walletslot");
-  if (account) { let bal = 0n; try { bal = await balanceOf(account); } catch (_) {} slot.innerHTML = `<span class="mono" style="font-size:12.5px;color:var(--txt2)">${short(account)} / ${toGen(bal)} GEN</span>`; }
+  if (account) { let bal = 0n; try { bal = await balanceOf(account); } catch (_) {} slot.innerHTML = `<span class="mono" style="font-size:12.5px;color:var(--txt2)">${short(account)} \u00b7 ${toGen(bal)} GEN</span>`; }
   else { slot.innerHTML = `<button class="btn ghost sm" id="connectBtn">Connect</button>`; $("connectBtn").onclick = doConnect; }
 }
-async function doConnect() { try { account = await connectWallet(); toast("Connected on studionet.", "ok"); await refreshWallet(); } catch (e) { toast(fmtErr(e), "err"); } }
+async function doConnect() { try { account = await connectWallet(); toast("Connected on Bradbury.", "ok"); await refreshWallet(); } catch (e) { toast(fmtErr(e), "err"); } }
 async function ensureWallet() { if (!account) account = await connectWallet(); await refreshWallet(); }
 
 const subsFor = (bid) => submissions.filter((s) => Number(s.bounty_id) === bid);
@@ -146,7 +142,7 @@ async function doSubmit(id) {
 }
 async function doJudge(sid) {
   if (!confirm("Run AI judging? Validators read the submission against the spec. Calls a real LLM; passing pays the solver.")) return;
-  toast("Validators judging the submission...", "", "judge");
+  toast("Validators judging the submission\u2026", "", "judge");
   try { await ensureWallet(); await write(CONTRACT, "judge", [sid]); toast("Judged on-chain.", "ok"); closeDrawer(); await load(); }
   catch (e) { toast(fmtErr(e), "err"); }
 }

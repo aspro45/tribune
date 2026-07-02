@@ -281,7 +281,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def set_bounty_standard(self, standard: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         text = _s(standard, 1600)
         if text == "":
             raise Exception("empty_standard")
@@ -290,7 +290,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write.payable
     def post_bounty(self, title: str, spec: str) -> int:
-        self.clock += 1
+        self.clock += u256(1)
         reward = gl.message.value
         if reward == u256(0):
             raise Exception("reward_required")
@@ -317,7 +317,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def submit_solution(self, bounty_id: int, url: str) -> int:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         b = self._load_bounty(str(bounty_id))
         if b["status"] not in ("OPEN", "REVIEWED", "CHALLENGE_WINDOW", "APPEALED"):
@@ -337,7 +337,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def judge(self, submission_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         if submission_id < 0 or submission_id >= len(self.submissions):
             raise Exception("no_such_submission")
@@ -392,7 +392,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def cancel_bounty(self, bounty_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         b = self._load_bounty(str(bounty_id))
         if b["status"] != "OPEN":
@@ -407,7 +407,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def open_bounty(self, statement: str, source_url: str) -> int:
-        self.clock += 1
+        self.clock += u256(1)
         stmt = _s(statement, 900)
         if stmt == "":
             raise Exception("empty_statement")
@@ -430,7 +430,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write.payable
     def open_bounty_with_source(self, insurer: str, description: str, trigger_url: str, trigger_condition: str, payout: int) -> int:
-        self.clock += 1
+        self.clock += u256(1)
         premium = gl.message.value
         if premium == u256(0):
             raise Exception("premium_required")
@@ -460,7 +460,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def draft_bounty(self, insurer: str, description: str, trigger_condition: str, trigger_url: str, category: str, payout_wei: str) -> int:
-        self.clock += 1
+        self.clock += u256(1)
         t = _s(description, 900)
         c = _s(trigger_condition, 700)
         if t == "":
@@ -499,7 +499,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def reserve_item(self, bounty_id: str, insurer: str, paid_wei: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] != "OPEN":
@@ -519,7 +519,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write.payable
     def submission(self, bounty_id: int, side: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] not in ("OPEN", "REVIEWING", "REVIEWED", "CHALLENGE_WINDOW", "APPEALED"):
@@ -542,7 +542,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write.payable
     def underwrite(self, bounty_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] != "OPEN":
@@ -559,7 +559,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write.payable
     def buy(self, item_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(item_id))
         if a["status"] != "OPEN":
@@ -576,7 +576,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def commit(self, bounty_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] != "OPEN":
@@ -589,7 +589,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def submit(self, bounty_id: int, trigger_url: str) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] != "ACTIVE":
@@ -609,7 +609,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def add_obligation(self, bounty_id: str, description: str, detail: str, trigger_url: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("OPEN", "ACTIVE", "CLAIMED", "REVIEWING", "REVIEWED"):
@@ -626,7 +626,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def add_evidence(self, bounty_id: str, url: str, kind: str, note: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("OPEN", "ACTIVE", "CLAIMED", "REVIEWING", "REVIEWED", "CHALLENGE_WINDOW"):
@@ -644,7 +644,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def open_review(self, bounty_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("OPEN", "ACTIVE", "CLAIMED", "REVIEWED"):
@@ -657,7 +657,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def review_bounty_with_genlayer(self, bounty_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("OPEN", "ACTIVE", "CLAIMED", "REVIEWING", "REVIEWED"):
@@ -695,8 +695,36 @@ class Tribune(gl.Contract):
         return res["outcome"]
 
     @gl.public.write
+    def record_review_fallback(self, bounty_id: str, outcome: str, confidence_bps: int, trigger_bps: int, summary: str) -> str:
+        self.clock += u256(1)
+        actor = gl.message.sender_address.as_hex
+        a = self._load_bounty(bounty_id)
+        if a["status"] not in ("OPEN", "ACTIVE", "CLAIMED", "REVIEWING", "REVIEWED"):
+            raise Exception("invalid_transition")
+        res = _norm_review({"outcome": outcome, "confidenceBps": confidence_bps, "triggerBps": trigger_bps,
+                            "summary": summary, "rationale": summary, "riskFlags": []})
+        rid = str(len(self.reviews))
+        self.reviews.append(json.dumps({"id": rid, "bountyId": bounty_id, "reviewer": actor,
+                                        "outcome": res["outcome"], "confidenceBps": res["confidenceBps"],
+                                        "triggerBps": res["triggerBps"], "summary": res["summary"],
+                                        "rationale": res["rationale"], "riskFlags": res["riskFlags"],
+                                        "createdAt": str(int(self.clock))}))
+        a["reviewIds"].append(rid)
+        a["outcome"] = res["outcome"]
+        a["confidenceBps"] = int(res["confidenceBps"])
+        a["triggerBps"] = int(res["triggerBps"])
+        a["summary"] = res["summary"]
+        a["rationale"] = res["rationale"]
+        a["riskFlags"] = res["riskFlags"]
+        before = a["status"]
+        self._set_status(a, "REVIEWED")
+        self._add_audit(a, actor, "record_review_fallback", res["summary"], before, "REVIEWED")
+        self._store_bounty(a)
+        return rid
+
+    @gl.public.write
     def settle(self, bounty_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] in ("RESOLVED", "ARCHIVED"):
@@ -727,7 +755,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def bounty_winnings(self, bounty_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(bounty_id))
         if a["status"] not in ("RESOLVED", "ARCHIVED"):
@@ -758,7 +786,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def cancel(self, item_id: int) -> None:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(str(item_id))
         if a["status"] != "OPEN":
@@ -773,7 +801,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def open_challenge_window(self, bounty_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] != "REVIEWED":
@@ -785,7 +813,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def submit_challenge(self, bounty_id: str, bounty: str, evidence_url: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] != "CHALLENGE_WINDOW":
@@ -802,7 +830,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def resolve_challenge_with_genlayer(self, bounty_id: str, challenge_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] != "CHALLENGE_WINDOW":
@@ -836,8 +864,36 @@ class Tribune(gl.Contract):
         return res["ruling"]
 
     @gl.public.write
+    def record_challenge_ruling(self, bounty_id: str, challenge_id: str, ruling: str, reason: str) -> str:
+        self.clock += u256(1)
+        actor = gl.message.sender_address.as_hex
+        a = self._load_bounty(bounty_id)
+        if a["status"] != "CHALLENGE_WINDOW":
+            raise Exception("invalid_transition")
+        ch = json.loads(self.challenges[int(challenge_id)])
+        if ch["bountyId"] != bounty_id:
+            raise Exception("bad_challenge")
+        if ch["status"] != "open":
+            return ch["status"]
+        res = _norm_ruling({"ruling": ruling, "confidenceDeltaBps": 0, "reason": reason, "riskFlags": []},
+                           ("accepted", "rejected", "partially_accepted", "inconclusive"), "inconclusive")
+        ch["status"] = res["ruling"]
+        ch["ruling"] = res["reason"]
+        ch["confidenceDeltaBps"] = res["confidenceDeltaBps"]
+        ch["riskFlags"] = res["riskFlags"]
+        self.challenges[int(challenge_id)] = json.dumps(ch)
+        a["confidenceBps"] = max(0, min(10000, int(a["confidenceBps"]) + int(res["confidenceDeltaBps"])))
+        if res["ruling"] in ("accepted", "partially_accepted"):
+            self._rep_bump(ch["challenger"], 50, "successfulChallenges")
+        elif res["ruling"] == "rejected":
+            self._rep_bump(ch["challenger"], -25, "failedChallenges")
+        self._add_audit(a, actor, "record_challenge_ruling", res["reason"], "CHALLENGE_WINDOW", "CHALLENGE_WINDOW")
+        self._store_bounty(a)
+        return res["ruling"]
+
+    @gl.public.write
     def submit_appeal(self, bounty_id: str, reason: str, evidence_url: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("CHALLENGE_WINDOW", "APPEALED"):
@@ -856,7 +912,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def resolve_appeal_with_genlayer(self, bounty_id: str, appeal_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] != "APPEALED":
@@ -890,8 +946,36 @@ class Tribune(gl.Contract):
         return res["ruling"]
 
     @gl.public.write
+    def record_appeal_ruling(self, bounty_id: str, appeal_id: str, ruling: str, reason: str) -> str:
+        self.clock += u256(1)
+        actor = gl.message.sender_address.as_hex
+        a = self._load_bounty(bounty_id)
+        if a["status"] != "APPEALED":
+            raise Exception("invalid_transition")
+        ap = json.loads(self.appeals[int(appeal_id)])
+        if ap["bountyId"] != bounty_id:
+            raise Exception("bad_appeal")
+        if ap["status"] != "open":
+            return ap["status"]
+        res = _norm_ruling({"ruling": ruling, "confidenceDeltaBps": 0, "reason": reason, "riskFlags": []},
+                           ("granted", "denied", "partially_granted", "inconclusive"), "inconclusive")
+        ap["status"] = res["ruling"]
+        ap["ruling"] = res["reason"]
+        ap["confidenceDeltaBps"] = res["confidenceDeltaBps"]
+        ap["riskFlags"] = res["riskFlags"]
+        self.appeals[int(appeal_id)] = json.dumps(ap)
+        a["confidenceBps"] = max(0, min(10000, int(a["confidenceBps"]) + int(res["confidenceDeltaBps"])))
+        if res["ruling"] in ("granted", "partially_granted"):
+            self._rep_bump(ap["appellant"], 45, "appealsGranted")
+        before = a["status"]
+        self._set_status(a, "CHALLENGE_WINDOW")
+        self._add_audit(a, actor, "record_appeal_ruling", res["reason"], before, "CHALLENGE_WINDOW")
+        self._store_bounty(a)
+        return res["ruling"]
+
+    @gl.public.write
     def archive_bounty(self, bounty_id: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         actor = gl.message.sender_address.as_hex
         a = self._load_bounty(bounty_id)
         if a["status"] not in ("PAID", "CANCELLED"):
@@ -904,7 +988,7 @@ class Tribune(gl.Contract):
 
     @gl.public.write
     def recalculate_reputation(self, address_text: str) -> str:
-        self.clock += 1
+        self.clock += u256(1)
         prof = self._rep(address_text)
         base = 5000
         base += int(prof.get("bountiesOpened", 0)) * 35

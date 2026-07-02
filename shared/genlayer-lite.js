@@ -1,15 +1,15 @@
-﻿// genlayer-lite.js - a tiny shared client for the static project frontends.
+// genlayer-lite.js - a tiny shared client for the static project frontends.
 // Reads use genlayer-js (from esm.sh CDN). Writes go through the connected
 // wallet (MetaMask), with the gas fields forced to legacy gasPrice=0 so the
 // wallet's gas oracle cannot wrongly claim "insufficient funds for fees" on a
-// zero-fee network like studionet.
-import { createClient, createAccount } from "https://esm.sh/genlayer-js@latest";
-import { studionet } from "https://esm.sh/genlayer-js@latest/chains";
+// Bradbury testnet.
+import { createClient, createAccount } from "https://esm.sh/genlayer-js@1.1.8";
+import { testnetBradbury } from "https://esm.sh/genlayer-js@1.1.8/chains";
 
-export const RPC = "https://studio.genlayer.com/api";
-export const STUDIONET_HEX = "0xf22f"; // 61999
+export const RPC = "https://rpc-bradbury.genlayer.com";
+export const BRADBURY_HEX = "0x107d"; // 4221
 
-const reader = createClient({ chain: studionet, account: createAccount() });
+const reader = createClient({ chain: testnetBradbury, account: createAccount() });
 
 export async function withRetry(fn, tries = 3) {
   let last;
@@ -47,20 +47,20 @@ export async function balanceOf(address) {
   return BigInt(await rpc("eth_getBalance", [address, "latest"]));
 }
 
-async function ensureStudionet(provider) {
+async function ensureBradbury(provider) {
   if (!provider?.request) return;
   try {
-    await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: STUDIONET_HEX }] });
+    await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BRADBURY_HEX }] });
   } catch (err) {
     if (err && (err.code === 4902 || /Unrecognized chain/i.test(err.message || ""))) {
       await provider.request({
         method: "wallet_addEthereumChain",
         params: [{
-          chainId: STUDIONET_HEX,
-          chainName: "GenLayer Studionet",
+          chainId: BRADBURY_HEX,
+          chainName: "GenLayer Bradbury",
           nativeCurrency: { name: "GEN", symbol: "GEN", decimals: 18 },
           rpcUrls: [RPC],
-          blockExplorers: [{ name: "Studio", url: "https://studio.genlayer.com" }],
+          blockExplorers: [{ name: "Bradbury Explorer", url: "https://explorer-bradbury.genlayer.com" }],
         }],
       });
     } else { throw err; }
@@ -92,7 +92,7 @@ export async function connectWallet() {
   const eth = window.ethereum;
   if (!eth) throw new Error("No EVM wallet found. Install MetaMask.");
   const accts = await eth.request({ method: "eth_requestAccounts" });
-  await ensureStudionet(eth);
+  await ensureBradbury(eth);
   return accts[0];
 }
 
@@ -108,17 +108,17 @@ export async function activeAccount() {
 export async function write(address, functionName, args = [], value = 0n, waitStatus = "ACCEPTED") {
   const eth = window.ethereum;
   if (!eth) throw new Error("No EVM wallet found. Install MetaMask.");
-  await ensureStudionet(eth);
+  await ensureBradbury(eth);
   let signer = await activeAccount();
   if (!signer) signer = (await eth.request({ method: "eth_requestAccounts" }))[0];
   const wrapped = wrapProvider(eth);
-  const client = createClient({ chain: studionet, account: signer, provider: wrapped });
+  const client = createClient({ chain: testnetBradbury, account: signer, provider: wrapped });
   const hash = await client.writeContract({ address, functionName, args, value });
   await client.waitForTransactionReceipt({ hash, status: waitStatus, retries: 200 });
   return hash;
 }
 
-export const short = (a) => (a ? a.slice(0, 6) + "..." + a.slice(-4) : "");
+export const short = (a) => (a ? a.slice(0, 6) + "\u2026" + a.slice(-4) : "");
 export const toGen = (wei) => (Number(BigInt(wei)) / 1e18).toLocaleString(undefined, { maximumFractionDigits: 3 });
 export const GEN = (n) => BigInt(Math.round(n * 1e6)) * 10n ** 12n; // GEN float -> wei
 
@@ -132,3 +132,4 @@ export function fmtErr(e) {
   add(e?.cause?.data?.message); add(e?.info?.error?.message);
   return parts.length ? parts.join(" | ") : String(e);
 }
+
