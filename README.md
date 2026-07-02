@@ -13,6 +13,7 @@ Tribune turns a bounty into a case file. A sponsor posts the standard and reward
 | Contract | [`0x6694f5D10f123DD9A8EDF2762690311e53f04deb`](https://explorer-bradbury.genlayer.com/address/0x6694f5D10f123DD9A8EDF2762690311e53f04deb) |
 | Deploy tx | [`0xfcc4c86ba58dceb5c683e14b7a15f0af99c92f019f882d94c91617b5e66538b7`](https://explorer-bradbury.genlayer.com/tx/0xfcc4c86ba58dceb5c683e14b7a15f0af99c92f019f882d94c91617b5e66538b7) |
 | Deployed | `2026-07-01T23:20:20.395Z` |
+| Live app | [`https://tribune-delta.vercel.app`](https://tribune-delta.vercel.app) |
 | Repository | `https://github.com/aspro45/tribune` |
 
 ## Contract Model
