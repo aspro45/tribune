@@ -15,3 +15,11 @@ private-keys.json
 *.pem
 *.p12
 *.pfx
+
+# local secrets and generated state
+.vercel/
+node_modules/
+.pytest_cache/
+__pycache__/
+*.pyc
+artifacts/

@@ -1,5 +1,6 @@
 import { makeReader, write, connectWallet, activeAccount, balanceOf, short, toGen, GEN, fmtErr }
   from "./shared/genlayer-lite.js";
+import { mountReviewDesk } from "./shared/review-desk.js";
 
 const CONTRACT = "0x6694f5D10f123DD9A8EDF2762690311e53f04deb";
 const { read } = makeReader(CONTRACT);
@@ -11,6 +12,15 @@ const SSTAT = ["Pending", "Accepted", "Rejected"];
 const SCLS = ["sb-pending", "sb-accepted", "sb-rejected"];
 let account = null, bounties = [], submissions = [];
 const $ = (id) => document.getElementById(id);
+
+queueMicrotask(() => mountReviewDesk({
+  contract: CONTRACT, read, write, ensureWallet, fmtErr,
+  entity: "Bounty", countMethod: "get_bounty_count", recordMethod: "get_bounty_record",
+  openWindowMethod: "open_challenge_window", submitChallengeMethod: "submit_challenge", resolveChallengeMethod: "resolve_challenge_with_genlayer",
+  submitAppealMethod: "submit_appeal", resolveAppealMethod: "resolve_appeal_with_genlayer", archiveMethod: "archive_bounty",
+  variant: "ribbon", kicker: "Award integrity", title: "Bounty objection lane",
+  intro: "Review the winning submission against its brief, contest the decision with a source, and close objections before the bounty leaves the active register.",
+}));
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 $("contractLink").textContent = "Contract " + short(CONTRACT) + " \u2197";
@@ -35,11 +45,9 @@ const subsFor = (bid) => submissions.filter((s) => Number(s.bounty_id) === bid);
 async function load() {
   try {
     const bc = Number(await read("get_bounty_count"));
-    const bs = [];
-    for (let i = 0; i < bc; i++) bs.push({ id: i, ...(await read("get_bounty", [i])) });
+    const bs = await Promise.all(Array.from({ length: bc }, (_, i) => read("get_bounty", [i]).then((record) => ({ id: i, ...record }))));
     const sc = Number(await read("get_submission_count"));
-    const ss = [];
-    for (let i = 0; i < sc; i++) ss.push({ id: i, ...(await read("get_submission", [i])) });
+    const ss = await Promise.all(Array.from({ length: sc }, (_, i) => read("get_submission", [i]).then((record) => ({ id: i, ...record }))));
     bounties = bs; submissions = ss; renderList(); fillTerm();
     $("bCount").textContent = bc + (bc === 1 ? " bounty" : " bounties");
     $("stOpen").textContent = bs.filter((b) => Number(b.status) === B_OPEN).length;

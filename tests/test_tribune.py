@@ -1,108 +1,115 @@
-"""Tests for TRIBUNE (direct runner). AI judge() validated live on studionet."""
+"""Executable Tribune V2 authorization and settlement-invariant tests."""
+
+import json
 from pathlib import Path
 
-CONTRACT = str(Path(__file__).resolve().parents[1] / "contracts" / "tribune.py")
-GEN = 10 ** 18
 
-B_OPEN = 0; B_PAID = 1; B_CANCELLED = 2
-SUB_PENDING = 0
+CONTRACT = str(Path(__file__).resolve().parents[1] / "contracts" / "tribune_v2.py")
 
 
-def _post(t, vm, who, title="Fix the memory leak", spec="A PR that fixes the leak with a test", reward=5):
-    vm.sender = who
-    vm.value = reward * GEN
-    bid = t.post_bounty(title, spec)
-    vm.value = 0
-    return bid
+def _deploy_and_draft(deploy, vm, owner, counterparty):
+    vm.warp("2026-07-16T12:00:00Z")
+    vm.sender = owner
+    contract = deploy(CONTRACT)
+    peer = "0x" + counterparty.hex()
+    record_id = contract.draft_bounty(peer, "Resolve the published bounty", "Accepted patch is publicly verifiable", "https://example.com", "engineering", "0")
+    return contract, record_id
 
 
-def test_post_bounty(deploy, direct_vm, direct_alice):
-    t = deploy(CONTRACT)
-    bid = _post(t, direct_vm, direct_alice)
-    assert bid == 0
-    b = t.get_bounty(0)
-    assert b["status"] == B_OPEN
-    assert int(b["reward"]) == 5 * GEN
+def _mock_review(vm):
+    vm.mock_llm(
+        r"Reply ONLY JSON with keys: outcome",
+        json.dumps({
+            "outcome": "met",
+            "confidenceBps": 8400,
+            "triggerBps": 8500,
+            "acceptanceBps": 8500,
+            "grantBps": 8500,
+            "settlementBps": 8500,
+            "deliveryBps": 8500,
+            "summary": "The submitted public evidence satisfies the standard.",
+            "rationale": "The source and stated condition agree.",
+            "riskFlags": [],
+        }),
+    )
 
 
-def test_post_requires_reward(deploy, direct_vm, direct_alice):
-    t = deploy(CONTRACT)
-    direct_vm.sender = direct_alice
-    direct_vm.value = 0
-    with direct_vm.expect_revert("lock a reward"):
-        t.post_bounty("t", "s")
+def _mock_ruling(vm, kind, ruling, revised):
+    vm.mock_llm(
+        rf"resolving .* {kind}",
+        json.dumps({
+            "ruling": ruling,
+            "revisedOutcome": revised,
+            "confidenceDeltaBps": -900 if revised == "not_met" else 700,
+            "reason": "The filing supplies controlling public evidence.",
+            "riskFlags": [],
+        }),
+    )
 
 
-def test_post_requires_spec(deploy, direct_vm, direct_alice):
-    t = deploy(CONTRACT)
-    direct_vm.sender = direct_alice
-    direct_vm.value = GEN
-    with direct_vm.expect_revert("a spec is required"):
-        t.post_bounty("t", "")
-    direct_vm.value = 0
-
-
-def test_submit_solution(deploy, direct_vm, direct_alice, direct_bob):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
+def test_admin_standard_and_review_permissions_execute(
+    deploy, direct_vm, direct_alice, direct_bob, direct_charlie
+):
+    contract, record_id = _deploy_and_draft(
+        deploy, direct_vm, direct_alice, direct_bob
+    )
     direct_vm.sender = direct_bob
-    sid = t.submit_solution(0, "https://github.com/bob/fix")
-    assert sid == 0
-    s = t.get_submission(0)
-    assert s["status"] == SUB_PENDING
-    assert s["bounty_id"] == 0
-    assert s["url"] == "https://github.com/bob/fix"
+    with direct_vm.expect_revert("admin_only"):
+        contract.set_bounty_standard("attacker-controlled settlement standard")
+
+    direct_vm.sender = direct_charlie
+    with direct_vm.expect_revert("record_operator_only"):
+        contract.review_bounty_with_genlayer(str(record_id))
 
 
-def test_submit_requires_open(deploy, direct_vm, direct_alice, direct_bob):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
+def test_maturity_challenge_appeal_and_final_settlement_execute(
+    deploy, direct_vm, direct_alice, direct_bob, direct_charlie
+):
+    contract, record_id = _deploy_and_draft(
+        deploy, direct_vm, direct_alice, direct_bob
+    )
     direct_vm.sender = direct_alice
-    t.cancel_bounty(0)
-    direct_vm.sender = direct_bob
-    with direct_vm.expect_revert("bounty is not open"):
-        t.submit_solution(0, "https://x.com")
+    _mock_review(direct_vm)
+    contract.review_bounty_with_genlayer(str(record_id))
 
+    with direct_vm.expect_revert("review_not_mature"):
+        contract.settle(record_id)
 
-def test_submit_requires_url(deploy, direct_vm, direct_alice, direct_bob):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
-    direct_vm.sender = direct_bob
-    with direct_vm.expect_revert("a solution URL is required"):
-        t.submit_solution(0, "")
+    contract.open_challenge_window(str(record_id))
+    direct_vm.sender = direct_charlie
+    challenge_id = contract.submit_challenge(
+        str(record_id),
+        "The initial source was superseded.",
+        "https://example.org/challenge",
+    )
 
-
-def test_cancel_bounty(deploy, direct_vm, direct_alice):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
     direct_vm.sender = direct_alice
-    t.cancel_bounty(0)
-    assert t.get_bounty(0)["status"] == B_CANCELLED
+    with direct_vm.expect_revert("open_review_filing"):
+        contract.settle(record_id)
 
+    _mock_ruling(direct_vm, "challenge", "accepted", "not_met")
+    contract.resolve_challenge_with_genlayer(str(record_id), challenge_id)
+    record = json.loads(contract.get_bounty_record(str(record_id)))
+    assert record["outcome"] == "not_met"
 
-def test_only_sponsor_cancels(deploy, direct_vm, direct_alice, direct_bob):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
-    direct_vm.sender = direct_bob
-    with direct_vm.expect_revert("only the sponsor can cancel"):
-        t.cancel_bounty(0)
+    direct_vm.sender = direct_charlie
+    appeal_id = contract.submit_appeal(
+        str(record_id),
+        "A final official publication controls the decision.",
+        "https://example.net/appeal",
+    )
 
-
-def test_judge_bad_id(deploy, direct_vm, direct_alice):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice)
     direct_vm.sender = direct_alice
-    with direct_vm.expect_revert("no such submission"):
-        t.judge(0)
+    with direct_vm.expect_revert("open_review_filing"):
+        contract.settle(record_id)
 
+    _mock_ruling(direct_vm, "appeal", "granted", "met")
+    contract.resolve_appeal_with_genlayer(str(record_id), appeal_id)
+    direct_vm.warp("2026-07-16T13:00:01Z")
+    contract.settle(record_id)
 
-def test_multiple(deploy, direct_vm, direct_alice, direct_bob):
-    t = deploy(CONTRACT)
-    _post(t, direct_vm, direct_alice, title="Bounty A")
-    _post(t, direct_vm, direct_alice, title="Bounty B")
-    direct_vm.sender = direct_bob
-    t.submit_solution(0, "https://a.com")
-    t.submit_solution(1, "https://b.com")
-    assert t.get_bounty_count() == 2
-    assert t.get_submission_count() == 2
-    assert t.get_submission(1)["bounty_id"] == 1
+    record = json.loads(contract.get_bounty_record(str(record_id)))
+    assert record["outcome"] == "met"
+    assert record["status"] == "RESOLVED"
+    assert record["challengeIds"] == [challenge_id]
+    assert record["appealIds"] == [appeal_id]

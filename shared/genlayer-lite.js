@@ -1,34 +1,52 @@
 // genlayer-lite.js - a tiny shared client for the static project frontends.
-// Reads use genlayer-js (from esm.sh CDN). Writes go through the connected
+// Reads use the locally bundled genlayer-js client. Writes go through the connected
 // wallet (MetaMask), with the gas fields forced to legacy gasPrice=0 so the
 // wallet's gas oracle cannot wrongly claim "insufficient funds for fees" on a
 // Bradbury testnet.
-import { createClient, createAccount } from "https://esm.sh/genlayer-js@1.1.8";
-import { testnetBradbury } from "https://esm.sh/genlayer-js@1.1.8/chains";
+import { createClient, createAccount, testnetBradbury } from "./vendor/genlayer-browser.js";
 
 export const RPC = "https://rpc-bradbury.genlayer.com";
 export const BRADBURY_HEX = "0x107d"; // 4221
 
 const reader = createClient({ chain: testnetBradbury, account: createAccount() });
 
-export async function withRetry(fn, tries = 3) {
+export async function withRetry(fn, tries = 1, timeoutMs = 5500) {
   let last;
   for (let i = 0; i < tries; i++) {
-    try { return await fn(); }
-    catch (e) {
+    try {
+      return await Promise.race([
+        fn(),
+        new Promise((_, reject) => setTimeout(
+          () => reject(new Error("Studionet read timed out.")),
+          timeoutMs,
+        )),
+      ]);
+    } catch (e) {
       last = e;
       const msg = (e?.message || e || "").toString();
-      if (!/failed to fetch|network|timeout|429|503/i.test(msg)) throw e;
-      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+      if (!/failed to fetch|network|timeout|timed out|429|503/i.test(msg)) throw e;
+      if (i < tries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 400 * (i + 1)));
+      }
     }
   }
   throw last;
 }
 
+export function normalizeReadResult(value) {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed || (trimmed[0] !== "{" && trimmed[0] !== "[")) return value;
+  try {
+    return JSON.parse(trimmed);
+  } catch (_) {
+    return value;
+  }
+}
 export function makeReader(address) {
   return {
     read: (functionName, args = []) =>
-      withRetry(() => reader.readContract({ address, functionName, args })),
+      withRetry(() => reader.readContract({ address, functionName, args })).then(normalizeReadResult),
   };
 }
 

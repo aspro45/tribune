@@ -14,3 +14,10 @@ private-keys.json
 *.pem
 *.p12
 *.pfx
+
+# local secrets and generated state
+.vercel/
+.env
+.env.*
+*.pyc
+artifacts/

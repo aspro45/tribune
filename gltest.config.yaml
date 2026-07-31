@@ -3,9 +3,6 @@ networks:
   default: testnetBradbury
   testnetBradbury:
     url: https://rpc-bradbury.genlayer.com
-    accounts:
-      - ${DEV_PRIVATE_KEY}
-    from: ${DEV_PRIVATE_KEY}
 
 paths:
   contracts: contracts
