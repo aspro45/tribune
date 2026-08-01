@@ -8,7 +8,11 @@ import { createClient, createAccount, testnetBradbury } from "./vendor/genlayer-
 export const RPC = "https://rpc-bradbury.genlayer.com";
 export const BRADBURY_HEX = "0x107d"; // 4221
 
-const reader = createClient({ chain: testnetBradbury, account: createAccount() });
+const READ_RPC = typeof window === "undefined" || /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)
+  ? RPC
+  : `${window.location.origin}/api/genlayer`;
+
+const reader = createClient({ chain: testnetBradbury, account: createAccount(), endpoint: READ_RPC });
 
 export async function withRetry(fn, tries = 1, timeoutMs = 5500) {
   let last;
@@ -51,7 +55,7 @@ export function makeReader(address) {
 }
 
 export async function rpc(method, params) {
-  const r = await fetch(RPC, {
+  const r = await fetch(READ_RPC, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
@@ -130,7 +134,7 @@ export async function write(address, functionName, args = [], value = 0n, waitSt
   let signer = await activeAccount();
   if (!signer) signer = (await eth.request({ method: "eth_requestAccounts" }))[0];
   const wrapped = wrapProvider(eth);
-  const client = createClient({ chain: testnetBradbury, account: signer, provider: wrapped });
+  const client = createClient({ chain: testnetBradbury, account: signer, provider: wrapped, endpoint: READ_RPC });
   const hash = await client.writeContract({ address, functionName, args, value });
   await client.waitForTransactionReceipt({ hash, status: waitStatus, retries: 200 });
   return hash;
